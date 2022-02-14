@@ -1,5 +1,7 @@
 package com.example.board.controller;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,17 +15,49 @@ import com.example.board.repository.Post;
 import com.example.board.repository.PostFactory;
 import com.example.board.repository.PostRepository;
 
-import net.bytebuddy.dynamic.DynamicType.Builder.FieldDefinition.Optional;
-
 /**
  * 掲示板のフロントコントローラー.
  */
 @Controller
 public class BoardController {
+	@Autowired
+	private PostRepository repository;
 
 	/**
 	 * 一覧を表示する。
 	 *
+	 * @param model モデル
+	 * @return テンプレート
+	 */
+	@RequestMapping(value = "/", method = RequestMethod.GET)
+	public String index(Model model) {
+		model.addAttribute("form", PostFactory.newPost());
+		model = this.setList(model);
+		model.addAttribute("path", "create");
+		return "layout";
+	}
+
+	private Model setList(Model model) {
+		Iterable<Post> list = repository.findAll();
+		model.addAttribute("list", list);
+		return model;
+	}
+
+	@RequestMapping(value = "/create", method = RequestMethod.POST)
+	public String create(@ModelAttribute("form") Post form, BindingResult result, Model model) {
+		if (!result.hasErrors()) {
+			repository.saveAndFlush(PostFactory.createPost(form));
+			model.addAttribute("form", PostFactory.newPost());
+		}
+		model = this.setList(model);
+		model.addAttribute("path", "create");
+		return "layout";
+	}
+
+	/**
+	 * 編集する投稿を表示する
+	 *
+	 * @param form  フォーム
 	 * @param model モデル
 	 * @return テンプレート
 	 */
@@ -36,22 +70,20 @@ public class BoardController {
 		return "layout";
 	}
 
-	@RequestMapping(value = "/error", method = RequestMethod.GET)
-	public String err(Model model) {
-		model.addAttribute("form", PostFactory.newPost());
-		return "layout";
-	}
-
-	/** 投稿の一覧 */
-	@Autowired
-	private PostRepository repository;
-
 	/**
-	 * + * 一覧を設定する。 + * + * @param model モデル + * @return 一覧を設定したモデル +
+	 * 更新する
+	 *
+	 * @param form  フォーム
+	 * @param model モデル
+	 * @return テンプレート
 	 */
-	private Model setList(Model model) {
-		Iterable<Post> list = repository.findAll();
-		model.addAttribute("list", list);
-		return model;
+	@RequestMapping(value = "/update", method = RequestMethod.POST)
+	public String update(@ModelAttribute("form") Post form, Model model) {
+		Optional<Post> post = repository.findById(form.getId());
+		repository.saveAndFlush(PostFactory.updatePost(post.get(), form));
+		model.addAttribute("form", PostFactory.newPost());
+		model = setList(model);
+		model.addAttribute("path", "create");
+		return "layout";
 	}
 }
