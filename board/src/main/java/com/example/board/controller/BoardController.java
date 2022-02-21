@@ -38,13 +38,13 @@ public class BoardController {
 	}
 
 	private Model setList(Model model) {
-		Iterable<Post> list = repository.findAll();
+		Iterable<Post> list = repository.findByDeletedFalseOrderByUpdatedDateDesc();/**何回も編集した意味は？*/
 		model.addAttribute("list", list);
 		return model;
 	}
 
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
-	public String create(@ModelAttribute("form") Post form, BindingResult result, Model model) {
+	public String create(@ModelAttribute("form") @Validated Post form, BindingResult result, Model model) {
 		if (!result.hasErrors()) {
 			repository.saveAndFlush(PostFactory.createPost(form));
 			model.addAttribute("form", PostFactory.newPost());
@@ -77,13 +77,29 @@ public class BoardController {
 	 * @param model モデル
 	 * @return テンプレート
 	 */
-	@RequestMapping(value = "/update", method = RequestMethod.POST)
-	public String update(@ModelAttribute("form") Post form, Model model) {
+	@RequestMapping(value = "/delete", method = RequestMethod.GET)
+	public String delete(@ModelAttribute("form") Post form, Model model) {
 		Optional<Post> post = repository.findById(form.getId());
-		repository.saveAndFlush(PostFactory.updatePost(post.get(), form));
+		repository.saveAndFlush(PostFactory.deletePost(post.get()));
 		model.addAttribute("form", PostFactory.newPost());
 		model = setList(model);
 		model.addAttribute("path", "create");
 		return "layout";
+	}
+
+	/**
+	 * 更新する
+	 *
+	 * @param form  フォーム
+	 * @param model モデル
+	 * @return テンプレート
+	 */
+	@RequestMapping(value = "/update", method = RequestMethod.POST)
+	public String update(@ModelAttribute("form") @Validated Post form, BindingResult result, Model model) {
+		if (!result.hasErrors()) {
+			Optional<Post> post = repository.findById(form.getId());
+			repository.saveAndFlush(PostFactory.updatePost(post.get(), form));
+
+		}
 	}
 }
