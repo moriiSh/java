@@ -14,4 +14,11 @@
     <fullyQualifiedTypeName name="java.util.Optional"/>
     <fullyQualifiedTypeName name="org.springframework.validation.annotation.Validated"/>
     <fullyQualifiedTypeName name="java.util.List"/>
+    <fullyQualifiedTypeName name="javax.validation.constraints.NotEmpty"/>
+    <fullyQualifiedTypeName name="javax.validation.constraints.NotNull"/>
+    <fullyQualifiedTypeName name="javax.validation.constraints.Size"/>
+    <fullyQualifiedTypeName name="javax.validation.GroupSequence"/>
+    <fullyQualifiedTypeName name="com.example.board.validation.Group1"/>
+    <fullyQualifiedTypeName name="com.example.board.validation.Group2"/>
+    <fullyQualifiedTypeName name="com.example.board.validation.GroupOrder"/>
 </qualifiedTypeNameHistroy>
